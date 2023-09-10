@@ -1,6 +1,13 @@
-use cursive::views::{
-    Button,
-    Dialog
+use cursive::{
+    view::Nameable,
+    views::{
+        Button,
+        Dialog,
+        DummyView,
+        LinearLayout,
+        SliderView,
+        TextView
+    }
 };
 use crate::menu;
 use webbrowser;
@@ -20,4 +27,36 @@ Check that you have a web browser installed."
             );
         }
     })
+}
+
+pub fn setting_char_num(desc: &str) -> LinearLayout {
+    let slider = SliderView::horizontal(8)
+        .value(2)
+        .on_change(|s, n| {
+            s.call_on_name("char_num", |v: &mut TextView| {
+                v.set_content(format!("{}", n + 2))
+            });
+        });
+
+    LinearLayout::horizontal()
+        .child(TextView::new(desc))
+        .child(slider)
+        .child(DummyView)
+        .child(TextView::new("4").with_name("char_num"))
+}
+
+pub fn setting_pass_len(desc: &str) -> LinearLayout {
+    let slider = SliderView::horizontal(8)
+        .value(2)
+        .on_change(|s, n| {
+            s.call_on_name("pass_len", |v: &mut TextView| {
+                v.set_content(format!("{}", n + 2))
+            });
+        });
+
+    LinearLayout::horizontal()
+        .child(TextView::new(desc))
+        .child(slider)
+        .child(DummyView)
+        .child(TextView::new("4").with_name("pass_len"))
 }
