@@ -1,2 +1,5 @@
 # mastermind-rs
-!!! WIP !!! A TUI Rust implementation of the Mastermind game
+
+## Notes
+- working state
+- but you wont get very far
