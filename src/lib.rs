@@ -1,21 +1,30 @@
+mod logic;
 mod util;
 use cursive::{
     Cursive,
     event,
+    utils::markup::StyledString,
     theme::{
         BaseColor,
         Color,
     },
-    utils::markup::StyledString,
-    view::Resizable,
+    view::{
+        // TODO r u sure about that
+        Nameable,
+        Resizable
+    },
     views::{
         Button,
         Dialog,
         DummyView,
+        EditView,
         LinearLayout,
-        TextView
+        ListView,
+        Panel,
+        TextView,
     }
 };
+use cursive_aligned_view::Alignable;
 
 // TODO eventually frame the settings to visually isolate from rules-about-quit buttons
 pub fn menu(s: &mut Cursive) {
@@ -30,9 +39,10 @@ pub fn menu(s: &mut Cursive) {
                 Color::Dark(BaseColor::Blue)
             )))
             .child(DummyView)
-            .child(util::setting_char_num("Character number: "))
+            .child(util::setting_digit_num("Digit number:     "))
             .child(util::setting_pass_len("Password length:  "))
             .child(DummyView)
+            // TODO big update incoming
             .child(Button::new("Start game", game))
         ).title("mastermind-rs")
         .button("Rules", rules)
@@ -43,19 +53,13 @@ pub fn menu(s: &mut Cursive) {
 
 fn about(s: &mut Cursive) {
     // TODO mention license
-    let banner =
-"                     _                      _           _ 
- _ __ ___   __ _ ___| |_ ___ _ __ _ __ ___ (_)_ __   __| |
-| '_ ` _ \\ / _` / __| __/ _ \\ '__| '_ ` _ \\| | '_ \\ / _` |
-| | | | | | (_| \\__ \\ ||  __/ |  | | | | | | | | | | (_| |
-|_| |_| |_|\\__,_|___/\\__\\___|_|  |_| |_| |_|_|_| |_|\\__,_|";
-
     let layout = LinearLayout::vertical()
         // TODO check out TextView to probably make this part more efficient
-        .child(TextView::new(banner))
+        .child(util::banner())
         .child(TextView::new(StyledString::styled(
             "
-A little game written for the sake of experience in writing Rust code. Also my first project using any kind of User Interface.
+A little game written for the sake of experience in writing
+Rust code. Also my first project using any kind of User Interface.
             ",
             Color::Dark(BaseColor::Blue)
         )))
@@ -76,54 +80,64 @@ Utilizes the \"cursive\" crate for building TUIs.
     );
 }
 
+// TODO impl Scrollable trait
 fn game(s: &mut Cursive) {
-    // TODO add global callback
-
-    let char_num = s.call_on_name("char_num", |v: &mut TextView| {
+    let digit_num: u8 = s.call_on_name("digit_num", |v: &mut TextView| {
         let binding = v.get_content();
-        binding.source().parse::<u8>().unwrap()
+        binding.source().parse().unwrap()
     }).unwrap();
-    let pass_len = s.call_on_name("pass_len", |v: &mut TextView| {
+    let pass_len: u8 = s.call_on_name("pass_len", |v: &mut TextView| {
         let binding = v.get_content();
-        binding.source().parse::<u8>().unwrap()
+        binding.source().parse().unwrap()
     }).unwrap();
-    let buttons = LinearLayout::vertical()
-        .child(Button::new("Back to menu", |s| { s.pop_layer(); menu(s) }))
-        .child(DummyView)
-        .child(Button::new("Ragequit", |s| s.quit()));
+    let password = logic::gen_password(digit_num, pass_len);
 
+    // TODO make center or make a box around it
+    let guesses = LinearLayout::horizontal()
+        .child(Panel::new(ListView::new()
+            .with_name("list")
+            .fixed_height(10)
+            .fixed_width(pass_len as usize + 5)
+        ))
+        // TODO dummy
+        .child(DummyView.fixed_width((pass_len as usize) / 2))
+        // TODO evtl add label here too (see ^)
+        .child(Panel::new(ListView::new()
+            .with_name("feedback")
+            .fixed_height(10)
+            .fixed_width(pass_len as usize + 1)
+        ));
+    let input = LinearLayout::horizontal()
+        .child(TextView::new("Your guess: "))
+        .child(EditView::new()
+            // TODO big update incoming
+            .on_submit(move |s, name: &str| {
+                logic::check_guess(s, name, digit_num, &password);
+            })
+            .max_content_width(pass_len as usize)
+            .fixed_width(pass_len as usize + 1)
+        ).align_bottom_right();
 
-    s.add_layer(Dialog::around(LinearLayout::horizontal()
-        .child(TextView::new("TODO new"))
-        // TODO evtl resize
-        .child(DummyView)
-        .child(buttons)
-    ).title("Game"));
+    s.add_layer(Dialog::around(LinearLayout::vertical()
+            .child(guesses.align_center())
+            .child(DummyView)
+            .child(input)
+        ).title("Game")
+        .button("Back to menu", |s| { s.pop_layer(); })
+        .button("Ragequit", |s| s.quit())
+    );
+    // TODO reject input if not according to rules
+    // and not a number
+    // and too *short*
 }
 
 fn rules(s: &mut Cursive) {
-    let rules = StyledString::styled(
-"
-A random password is generated based on your settings:
-
-1. \"Character number\" sets the amount of different
-   characters to feature.
-2. \"Password length\" sets the length of the generated
-   password.
-
-You try to guess it by filling in the input box.
-The game gives you feedback:
-
-1. A red star (*) means that one character in your guess
-   is right.
-2. A white star means that one character is featured in
-   the password but on another position.",
-        Color::Dark(BaseColor::Blue)
-    );
-
     s.add_layer(Dialog::around(LinearLayout::vertical()
-        .child(TextView::new("(Use the arrow keys or the mouse to navigate)"))
-        .child(TextView::new(rules))
+        .child(TextView::new(
+"Use the arrow keys or the mouse to navigate.
+Press q to close windows and Esc to quit the game."
+).align_center())
+        .child(TextView::new(util::rules()))
     ).title("Rules")
     .button("Ok", |s| { s.pop_layer(); }));
 }
