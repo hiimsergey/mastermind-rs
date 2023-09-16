@@ -1,41 +1,108 @@
-// let password = logic::gen_pasword(&pass_len, char_num);
+// TODO add confimation screen when pressing Esc
+use crate::util::FormatError;
+use cursive::{
+    Cursive,
+    theme::{
+        BaseColor,
+        Color
+    },
+    utils::markup::StyledString,
+    views::{
+        Dialog,
+        EditView,
+        TextView,
+        ListView,
+        ScrollView
+    }
+};
+use rand::Rng;
 
-// TODO maybe pass pass_len without ref because its an u8 either way
-// game(s, &pass_len);
-// logic::game_process(password);
+// TODO clear input after submit, no matter if valid
+pub fn check_guess(s: &mut Cursive, guess: &str, digit_num: u8, password: &Vec<u8>) {
+    if let Err(err) = get_guess_status(guess, digit_num, password) {
+        s.add_layer(Dialog::around(TextView::new(match err {
+            FormatError::DigitLimit => "The given guess contains \ndigits outside the limit.",
+            FormatError::NaN => "The given guess is \nnot a valid number.",
+            FormatError::Short => "The given guess \nis too short."
+        }))
+            .title("Invalid input")
+            .button("Ok", |s| { s.pop_layer(); })
+        );
+    } else { compare_guess(s, guess, password); }
+}
 
-// fn gen_password(pass_len: u8, char_num: u8) -> u32 {
-//     for _ in 0..pass_len {}
-// }
+pub fn gen_password(digit_num: u8, pass_len: u8) -> Vec<u8> {
+    let mut rng = rand::thread_rng();
+    let mut pass = Vec::<u8>::new();
+    for _ in 0..pass_len {
+        pass.push(rng.gen_range(1..=digit_num));
+    }
+    pass
+}
 
-// fn game_process(password: u32) {
-    // TODO not accurate, needs check and rewrite
-    // s.call_on_name("list", |v| {
-    //     v.set_on_submit(|| {
-    //         /*
-    //         check valid guess
-    //         add guess to list
-    //         check password
-    //             if right, show win dialog
-    //             else print_stars
-    //         */
-    //     })
-    // })
-// }
+fn compare_guess(s: &mut Cursive, guess: &str, password: &Vec<u8>) {
+    let mut feedback = String::new();
+    let mut guess_vec: Vec<u8> = guess
+        .chars()
+        .map(|c| c.to_digit(10).unwrap() as u8)
+        .collect();
 
-// TODO write this                  // "&str": im not sure
-// pub fn check_valid_input(password: &str) -> Result<(), FormatError> {}
+    for i in 0..password.len() {
+        if password[i] == guess_vec[i] {
+            guess_vec[i] = 0;
+            feedback = format!("!{feedback}");
+            continue;
+        }
+        for k in 0..password.len() {
+            if password[i] == guess_vec[k] && guess_vec[k] != password[k] {
+                guess_vec[k] = 0;
+                feedback = format!("{feedback}?");
+                break;
+            }
+        }
+    }
+    for _ in 0..(password.len() - feedback.len()) {
+        feedback = format!("{feedback}.");
+    }
 
-// TODO then write this
-// enum FormatError {
-//     Short,
-//     NaN,
-//     WrongChar
-// }
+    print_feedback(s, guess, feedback);
+}
 
-// TODO and somewhere, write this
-// s.add_layer(Dialog::info(match valid_guess {
-//     FormatError::Short => "The provided guess is too short.",
-//     FormatError::Nan => "The guess is not a number.",
-//     FormatError::WrongChar => "The guess contains a digit beyond the character number limit."
-// }))
+fn get_guess_status(guess: &str, digit_num: u8, password: &Vec<u8>) -> Result<(), FormatError> {
+    if guess.len() < password.len() {
+        return Err(FormatError::Short);
+    }
+    if let Err(_) = guess.parse::<u32>() {
+        return Err(FormatError::NaN);
+    }
+    for c in guess.chars() {
+        if !(1..=digit_num).contains(&(c.to_digit(10).unwrap() as u8)) {
+            return Err(FormatError::DigitLimit);
+        }
+    }
+    Ok(())
+}
+
+fn print_feedback(s: &mut Cursive, guess: &str, feedback: String) {
+    s.call_on_name("list", |v: &mut ScrollView<ListView>| {
+        let len = format!("{}.", v.get_inner().len() + 1);
+        v.get_inner_mut().add_child("", TextView::new(
+            format!(
+                "{:<5}{guess}{:>len_fmt$}",
+                len,
+                &feedback,
+                len_fmt = guess.len() + 4
+            )
+        ));
+        v.scroll_to_bottom();
+    });
+
+    if feedback.chars().all(|c| c == '!') {
+        s.call_on_name("input", |v: &mut EditView| v.disable() );
+        s.add_layer(Dialog::info(StyledString::styled("Congratulations!", Color::Dark(BaseColor::Blue)))
+            .title("You won!")
+            .button("Menu", |s| { s.pop_layer(); s.pop_layer(); })
+            .button("Quit", |s| s.quit() )
+        );
+    }
+}

@@ -15,22 +15,11 @@ use cursive::{
 };
 use webbrowser;
 
-// TODO write this                  // "&str": im not sure
-// pub fn check_valid_input(password: &str) -> Result<(), FormatError> {}
-
-// TODO then write this
-// enum FormatError {
-//     Short,
-//     NaN,
-//     WrongChar
-// }
-
-// TODO and somewhere, write this
-// s.add_layer(Dialog::info(match valid_guess {
-//     FormatError::Short => "The provided guess is too short.",
-//     FormatError::Nan => "The guess is not a number.",
-//     FormatError::WrongChar => "The guess contains a digit beyond the character number limit."
-// }))
+pub enum FormatError {
+    DigitLimit,
+    NaN,
+    Short
+}
 
 pub fn source_button(url: &'static str) -> Button {
     Button::new("source ↗", |s| {
@@ -39,17 +28,16 @@ pub fn source_button(url: &'static str) -> Button {
             s.add_layer(Dialog::info(
 "Couldn't connect to the website. :[
 Check that you have a web browser installed."
-            ).title("Connection error")
-            );
+            ).title("Connection error"));
         }
     })
 }
 
-pub fn setting_char_num(desc: &str) -> LinearLayout {
+pub fn setting_digit_num(desc: &str) -> LinearLayout {
     let slider = SliderView::horizontal(8)
         .value(2)
         .on_change(|s, n| {
-            s.call_on_name("char_num", |v: &mut TextView| {
+            s.call_on_name("digit_num", |v: &mut TextView| {
                 v.set_content(format!("{}", n + 2))
             });
         });
@@ -58,7 +46,7 @@ pub fn setting_char_num(desc: &str) -> LinearLayout {
         .child(TextView::new(desc))
         .child(slider)
         .child(DummyView)
-        .child(TextView::new("4").with_name("char_num"))
+        .child(TextView::new("4").with_name("digit_num"))
 }
 
 pub fn setting_pass_len(desc: &str) -> LinearLayout {
@@ -92,7 +80,7 @@ pub fn rules() -> StyledString {
 "
 A random password is generated based on your settings:
 
-1. \"Character number\" sets the amount of different
+1. \"Digit number\" sets the amount of different
     characters to feature.
 2. \"Password length\" sets the length of the generated
     password.
@@ -100,10 +88,11 @@ A random password is generated based on your settings:
 You try to guess it by filling in the input box.
 The game gives you feedback:
 
-1. A red star (*) means that one character in your guess
-    is right.
-2. A white star means that one character is featured in
-    the password but on another position.",
+1. An exclamation mark means that one character in your
+   guess is right.
+2. A question mark means that one character is featured
+   in the password but on another position.
+3. A dot means that a character isn't featured at all.",
         Color::Dark(BaseColor::Blue)
     )
 }

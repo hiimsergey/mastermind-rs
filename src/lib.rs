@@ -9,7 +9,6 @@ use cursive::{
         Color,
     },
     view::{
-        // TODO r u sure about that
         Nameable,
         Resizable
     },
@@ -19,17 +18,18 @@ use cursive::{
         DummyView,
         EditView,
         LinearLayout,
-        TextView, ListView
+        ListView,
+        Panel,
+        ScrollView,
+        TextView,
     }
 };
 use cursive_aligned_view::Alignable;
 
-// TODO eventually frame the settings to visually isolate from rules-about-quit buttons
+// TODO or maybe substitute feedback for a color canvas
 pub fn menu(s: &mut Cursive) {
-    // TODO find T02
     s.add_global_callback(event::Key::Esc, |s| s.quit());
     // TODO if the last window gets closed, the program stops
-    // if game closes, menu pops up
     s.add_global_callback('q', |s| { s.pop_layer(); });
     s.add_layer(Dialog::around(LinearLayout::vertical()
             .child(TextView::new(StyledString::styled(
@@ -37,28 +37,11 @@ pub fn menu(s: &mut Cursive) {
                 Color::Dark(BaseColor::Blue)
             )))
             .child(DummyView)
-            .child(util::setting_char_num("Character number: "))
+            .child(util::setting_digit_num("Digit number:     "))
             .child(util::setting_pass_len("Password length:  "))
             .child(DummyView)
-            // TODO this is backup
-            //.child(Button::new("Start game", game))
-            .child(Button::new("Start game", |s| {
-                let char_num: u8 = s.call_on_name("char_num", |v: &mut TextView| {
-                    let binding = v.get_content();
-                    binding.source().parse().unwrap()
-                }).unwrap();
-                let pass_len: u8 = s.call_on_name("pass_len", |v: &mut TextView| {
-                    let binding = v.get_content();
-                    binding.source().parse().unwrap()
-                }).unwrap();
-                
-                // // TODO r u sure about that
-                // let password = logic::gen_pasword(&pass_len, char_num);
-                
-                // // TODO maybe pass pass_len without ref because its an u8 either way
-                // game(s, &pass_len);
-                // logic::game_process(password);
-            }))
+            // TODO big update incoming
+            .child(Button::new("Start game", game))
         ).title("mastermind-rs")
         .button("Rules", rules)
         .button("About", about)
@@ -76,6 +59,7 @@ fn about(s: &mut Cursive) {
 A little game written for the sake of experience in writing
 Rust code. Also my first project using any kind of User Interface.
             ",
+            // TODO use TextView::style to color
             Color::Dark(BaseColor::Blue)
         )))
         .child(util::source_button("https://github.com/hiimsergey/mastermind-rs"))
@@ -87,7 +71,6 @@ Utilizes the \"cursive\" crate for building TUIs.
         )))
         .child(util::source_button("https://crates.io/crates/cursive"));
 
-    // TODO dont forget to impl this for other menu-originating functions
     s.add_layer(Dialog::around(layout)
         .button("Ok", |s| { s.pop_layer(); })
         .title("About mastermind-rs")
@@ -95,39 +78,79 @@ Utilizes the \"cursive\" crate for building TUIs.
     );
 }
 
-// TODO separate logic from windows
-// gen password
-// add confimation screen when pressing Esc
-fn game(s: &mut Cursive, pass_len: &u8) {
-    // TODO impl Scrollable trait
-    let guesses = LinearLayout::horizontal()
-        .child(ListView::new().with_name("list").fixed_height(10).fixed_width(*pass_len as usize))
-        .child(DummyView)
-        // TODO evtl add label here too (see ^)
-        .child(ListView::new().fixed_height(10).fixed_width(*pass_len as usize));
+// TODO make it horizontal
+fn game(s: &mut Cursive) {
+    let digit_num: u8 = s.call_on_name("digit_num", |v: &mut TextView| {
+        let binding = v.get_content();
+        binding.source().parse().unwrap()
+    }).unwrap();
+    let pass_len: u8 = s.call_on_name("pass_len", |v: &mut TextView| {
+        let binding = v.get_content();
+        binding.source().parse().unwrap()
+    }).unwrap();
+    let password = logic::gen_password(digit_num, pass_len);
+
+    // TODO think about moving these little Views into views.rs
+    // TODO restructure all the windows like this
+    let settings = TextView::new(
+        StyledString::styled(
+            format!("
+Digit number:    {digit_num}
+Password length: {pass_len}"),
+            Color::Dark(BaseColor::Blue)
+        )
+    ).align_center();
+    let list = Panel::new(
+        ScrollView::new(
+            ListView::new()
+        ).with_name("list")
+    ).fixed_height(12).fixed_width(2 * (pass_len as usize) + 14);
     let input = LinearLayout::horizontal()
         .child(TextView::new("Your guess: "))
         .child(EditView::new()
-            .max_content_width(*pass_len as usize)
-            .fixed_width(*pass_len as usize + 1)
-        ).align_bottom_right();
+            .on_submit(move |s, name: &str| {
+                s.call_on_name("input", |v: &mut EditView| {
+                    v.set_content("");
+                });
+                logic::check_guess(s, name, digit_num, &password);
+            })
+            .max_content_width(pass_len as usize)
+            .with_name("input")
+            .fixed_width(pass_len as usize + 1)
+        ).align_center();
+    // TODO reorder this
+    let game_sidebar = LinearLayout::vertical()
+        .child(settings)
+        .child(DummyView)
+        .child(input)
+        .child(DummyView.fixed_height(4))
+        .child(Button::new("Menu", |s| { s.pop_layer(); }).align_bottom_right())
+        .child(Button::new("Ragequit", |s| s.quit() ).align_bottom_right());
 
-    s.add_layer(Dialog::around(LinearLayout::vertical()
-            .child(guesses)
-            .child(DummyView)
-            .child(input)
+    // TODO keep or delete
+    // s.add_layer(Dialog::around(LinearLayout::vertical()
+    //         .child(settings)
+    //         .child(input)
+    //     ).title("Game")
+    //     .button("Menu", |s| { s.pop_layer(); })
+    //     .button("Ragequit", |s| s.quit())
+    // );
+    s.add_layer(
+        Dialog::around(
+            LinearLayout::horizontal()
+                .child(list)
+                .child(DummyView)
+                .child(game_sidebar)
         ).title("Game")
-        .button("Back to menu", |s| { s.pop_layer(); })
-        .button("Ragequit", |s| s.quit())
     );
-    // TODO reject input if not according to rules
-    // and not a number
-    // and too *short*
 }
 
 fn rules(s: &mut Cursive) {
     s.add_layer(Dialog::around(LinearLayout::vertical()
-        .child(TextView::new("(Use the arrow keys or the mouse to navigate)").align_center())
+        .child(TextView::new(
+"Use the arrow keys or the mouse to navigate.
+Press q to close windows and Esc to quit the game."
+).align_center())
         .child(TextView::new(util::rules()))
     ).title("Rules")
     .button("Ok", |s| { s.pop_layer(); }));
