@@ -9,7 +9,6 @@ use cursive::{
         Color,
     },
     view::{
-        // TODO r u sure about that
         Nameable,
         Resizable
     },
@@ -21,17 +20,16 @@ use cursive::{
         LinearLayout,
         ListView,
         Panel,
+        ScrollView,
         TextView,
     }
 };
 use cursive_aligned_view::Alignable;
 
-// TODO eventually frame the settings to visually isolate from rules-about-quit buttons
+// TODO or maybe substitute feedback for a color canvas
 pub fn menu(s: &mut Cursive) {
-    // TODO find T02
     s.add_global_callback(event::Key::Esc, |s| s.quit());
     // TODO if the last window gets closed, the program stops
-    // if game closes, menu pops up
     s.add_global_callback('q', |s| { s.pop_layer(); });
     s.add_layer(Dialog::around(LinearLayout::vertical()
             .child(TextView::new(StyledString::styled(
@@ -61,6 +59,7 @@ fn about(s: &mut Cursive) {
 A little game written for the sake of experience in writing
 Rust code. Also my first project using any kind of User Interface.
             ",
+            // TODO use TextView::style to color
             Color::Dark(BaseColor::Blue)
         )))
         .child(util::source_button("https://github.com/hiimsergey/mastermind-rs"))
@@ -72,7 +71,6 @@ Utilizes the \"cursive\" crate for building TUIs.
         )))
         .child(util::source_button("https://crates.io/crates/cursive"));
 
-    // TODO dont forget to impl this for other menu-originating functions
     s.add_layer(Dialog::around(layout)
         .button("Ok", |s| { s.pop_layer(); })
         .title("About mastermind-rs")
@@ -80,7 +78,6 @@ Utilizes the \"cursive\" crate for building TUIs.
     );
 }
 
-// TODO impl Scrollable trait
 fn game(s: &mut Cursive) {
     let digit_num: u8 = s.call_on_name("digit_num", |v: &mut TextView| {
         let binding = v.get_content();
@@ -92,38 +89,43 @@ fn game(s: &mut Cursive) {
     }).unwrap();
     let password = logic::gen_password(digit_num, pass_len);
 
-    // TODO make center or make a box around it
-    let guesses = LinearLayout::horizontal()
-        .child(Panel::new(ListView::new()
-            .with_name("list")
-            .fixed_height(10)
-            .fixed_width(pass_len as usize + 5)
-        ))
-        // TODO dummy
-        .child(DummyView.fixed_width((pass_len as usize) / 2))
-        // TODO evtl add label here too (see ^)
-        .child(Panel::new(ListView::new()
-            .with_name("feedback")
-            .fixed_height(10)
-            .fixed_width(pass_len as usize + 1)
-        ));
+    // TODO readd Panel
+    // TODO restructure all the windows like this
+    // TODO think about moving these little Views into views.rs
+    let settings = TextView::new(
+            StyledString::styled(
+            format!("Digit number:    {digit_num}\nPassword length: {pass_len}"),
+            Color::Dark(BaseColor::Blue)
+        )
+    ).align_center();
+    let list = Panel::new(
+        ScrollView::new(
+            ListView::new()
+        ).with_name("list")
+    ).fixed_height(12).fixed_width(2 * (pass_len as usize) + 14);
+    // TODO readd
+    // .align_center();
     let input = LinearLayout::horizontal()
         .child(TextView::new("Your guess: "))
         .child(EditView::new()
-            // TODO big update incoming
             .on_submit(move |s, name: &str| {
+                s.call_on_name("input", |v: &mut EditView| {
+                    v.set_content("");
+                });
                 logic::check_guess(s, name, digit_num, &password);
             })
             .max_content_width(pass_len as usize)
+            .with_name("input")
             .fixed_width(pass_len as usize + 1)
-        ).align_bottom_right();
+        ).align_center();
 
     s.add_layer(Dialog::around(LinearLayout::vertical()
-            .child(guesses.align_center())
+            .child(settings)
+            .child(list)
             .child(DummyView)
             .child(input)
         ).title("Game")
-        .button("Back to menu", |s| { s.pop_layer(); })
+        .button("Menu", |s| { s.pop_layer(); })
         .button("Ragequit", |s| s.quit())
     );
     // TODO reject input if not according to rules

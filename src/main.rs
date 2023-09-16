@@ -8,4 +8,6 @@ fn main() {
         // for every global callback
     // TODO recheck every single Dialog
         // change it to Dialog if necessary
+    // TODO add Readme to GitHub
+    // TODO search for print or eprints
 }

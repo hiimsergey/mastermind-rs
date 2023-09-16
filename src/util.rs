@@ -16,7 +16,7 @@ use cursive::{
 use webbrowser;
 
 pub enum FormatError {
-    BeyondDigitBound,
+    DigitLimit,
     NaN,
     Short
 }
@@ -80,7 +80,7 @@ pub fn rules() -> StyledString {
 "
 A random password is generated based on your settings:
 
-1. \"Character number\" sets the amount of different
+1. \"Digit number\" sets the amount of different
     characters to feature.
 2. \"Password length\" sets the length of the generated
     password.
@@ -91,7 +91,8 @@ The game gives you feedback:
 1. An exclamation mark means that one character in your
    guess is right.
 2. A question mark means that one character is featured
-   in the password but on another position.",
+   in the password but on another position.
+3. A dot means that a character isn't featured at all.",
         Color::Dark(BaseColor::Blue)
     )
 }
