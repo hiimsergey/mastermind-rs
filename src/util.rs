@@ -1,8 +1,5 @@
 use cursive::{
-    theme::{
-        BaseColor,
-        Color
-    },
+    theme::{ BaseColor, Color },
     view::Nameable,
     views::{
         Button,
@@ -11,7 +8,7 @@ use cursive::{
         LinearLayout,
         SliderView,
         TextView
-    }, utils::markup::StyledString
+    }
 };
 use webbrowser;
 
@@ -75,8 +72,8 @@ pub fn banner() -> TextView {
     )
 }
     
-pub fn rules() -> StyledString {
-    StyledString::styled(
+pub fn rules() -> TextView {
+    TextView::new(
 "
 A random password is generated based on your settings:
 
@@ -92,7 +89,6 @@ The game gives you feedback:
    guess is right.
 2. A question mark means that one character is featured
    in the password but on another position.
-3. A dot means that a character isn't featured at all.",
-        Color::Dark(BaseColor::Blue)
-    )
+3. A dot means that a character isn't featured at all."
+    ).style(Color::Dark(BaseColor::Blue))
 }

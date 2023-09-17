@@ -1,12 +1,7 @@
-// TODO add confimation screen when pressing Esc
 use crate::util::FormatError;
 use cursive::{
     Cursive,
-    theme::{
-        BaseColor,
-        Color
-    },
-    utils::markup::StyledString,
+    theme::{ BaseColor, Color },
     views::{
         Dialog,
         EditView,
@@ -17,17 +12,21 @@ use cursive::{
 };
 use rand::Rng;
 
-// TODO clear input after submit, no matter if valid
 pub fn check_guess(s: &mut Cursive, guess: &str, digit_num: u8, password: &Vec<u8>) {
     if let Err(err) = get_guess_status(guess, digit_num, password) {
-        s.add_layer(Dialog::around(TextView::new(match err {
-            FormatError::DigitLimit => "The given guess contains \ndigits outside the limit.",
-            FormatError::NaN => "The given guess is \nnot a valid number.",
-            FormatError::Short => "The given guess \nis too short."
-        }))
-            .title("Invalid input")
+        s.add_layer(
+            Dialog::around(
+                TextView::new(match err {
+                    FormatError::DigitLimit => "The given guess contains \ndigits outside the limit.",
+                    FormatError::NaN => "The given guess is \nnot a valid number.",
+                    FormatError::Short => "The given guess \nis too short."
+                }).style(Color::Dark(BaseColor::Red))
+            ).title("Invalid input")
             .button("Ok", |s| { s.pop_layer(); })
         );
+        s.call_on_name("input", |v: &mut EditView| {
+            v.set_content("");
+        });
     } else { compare_guess(s, guess, password); }
 }
 
@@ -98,13 +97,14 @@ fn print_feedback(s: &mut Cursive, guess: &str, feedback: String) {
     });
 
     if feedback.chars().all(|c| c == '!') {
-        s.call_on_name("input", |v: &mut EditView| {
-            // TODO
-            println!("TODO help");
-            v.disable();
-        });
-        s.add_layer(Dialog::info(StyledString::styled("Congratulations!", Color::Dark(BaseColor::Blue)))
-            .title("You won!")
+        s.call_on_name("input", |v: &mut EditView| v.disable() );
+        s.add_layer(
+            Dialog::around(
+                TextView::new(
+                    "Congratulations!"
+                ).style(Color::Dark(BaseColor::Blue))
+            ).title("You won!")
+            .button("Ok", |s| { s.pop_layer(); })
             .button("Menu", |s| { s.pop_layer(); s.pop_layer(); })
             .button("Quit", |s| s.quit() )
         );
