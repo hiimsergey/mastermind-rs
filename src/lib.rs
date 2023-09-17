@@ -34,7 +34,7 @@ pub fn menu(s: &mut Cursive) {
                     )
                     .child(DummyView)
                     .child(util::setting_digit_num("Digit number:     "))
-                    .child(util::setting_pass_len("Password length:  "))
+                    .child(util::setting_pass_len("Code length:      "))
                     .child(DummyView)
                     .child(Button::new("Start game", game))
             ).title("mastermind-rs")
@@ -88,19 +88,19 @@ fn game(s: &mut Cursive) {
         let binding = v.get_content();
         binding.source().parse().unwrap()
     }).unwrap();
-    let password = logic::gen_password(digit_num, pass_len);
+    let code = logic::gen_code(digit_num, pass_len);
 
     let settings = TextView::new(
         format!("
 Digit number:    {digit_num}
-Password length: {pass_len}"
+Code length:     {pass_len}"
         )
     ).style(Color::Dark(BaseColor::Blue)).align_center();
     let input = LinearLayout::horizontal()
         .child(TextView::new("Your guess: "))
         .child(EditView::new()
             .on_submit(move |s, name: &str| {
-                logic::check_guess(s, name, digit_num, &password);
+                logic::check_guess(s, name, digit_num, &code);
             })
             .max_content_width(pass_len as usize)
             .with_name("input")

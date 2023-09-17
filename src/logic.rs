@@ -12,8 +12,8 @@ use cursive::{
 };
 use rand::Rng;
 
-pub fn check_guess(s: &mut Cursive, guess: &str, digit_num: u8, password: &Vec<u8>) {
-    if let Err(err) = get_guess_status(guess, digit_num, password) {
+pub fn check_guess(s: &mut Cursive, guess: &str, digit_num: u8, code: &Vec<u8>) {
+    if let Err(err) = get_guess_status(guess, digit_num, code) {
         s.add_layer(
             Dialog::around(
                 TextView::new(match err {
@@ -27,10 +27,10 @@ pub fn check_guess(s: &mut Cursive, guess: &str, digit_num: u8, password: &Vec<u
         s.call_on_name("input", |v: &mut EditView| {
             v.set_content("");
         });
-    } else { compare_guess(s, guess, password); }
+    } else { compare_guess(s, guess, code); }
 }
 
-pub fn gen_password(digit_num: u8, pass_len: u8) -> Vec<u8> {
+pub fn gen_code(digit_num: u8, pass_len: u8) -> Vec<u8> {
     let mut rng = rand::thread_rng();
     let mut pass = Vec::<u8>::new();
     for _ in 0..pass_len {
@@ -39,36 +39,36 @@ pub fn gen_password(digit_num: u8, pass_len: u8) -> Vec<u8> {
     pass
 }
 
-fn compare_guess(s: &mut Cursive, guess: &str, password: &Vec<u8>) {
+fn compare_guess(s: &mut Cursive, guess: &str, code: &Vec<u8>) {
     let mut feedback = String::new();
     let mut guess_vec: Vec<u8> = guess
         .chars()
         .map(|c| c.to_digit(10).unwrap() as u8)
         .collect();
 
-    for i in 0..password.len() {
-        if password[i] == guess_vec[i] {
+    for i in 0..code.len() {
+        if code[i] == guess_vec[i] {
             guess_vec[i] = 0;
             feedback = format!("!{feedback}");
             continue;
         }
-        for k in 0..password.len() {
-            if password[i] == guess_vec[k] && guess_vec[k] != password[k] {
+        for k in 0..code.len() {
+            if code[i] == guess_vec[k] && guess_vec[k] != code[k] {
                 guess_vec[k] = 0;
                 feedback = format!("{feedback}?");
                 break;
             }
         }
     }
-    for _ in 0..(password.len() - feedback.len()) {
+    for _ in 0..(code.len() - feedback.len()) {
         feedback = format!("{feedback}.");
     }
 
     print_feedback(s, guess, feedback);
 }
 
-fn get_guess_status(guess: &str, digit_num: u8, password: &Vec<u8>) -> Result<(), FormatError> {
-    if guess.len() < password.len() {
+fn get_guess_status(guess: &str, digit_num: u8, code: &Vec<u8>) -> Result<(), FormatError> {
+    if guess.len() < code.len() {
         return Err(FormatError::Short);
     }
     if let Err(_) = guess.parse::<u32>() {

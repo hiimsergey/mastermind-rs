@@ -75,20 +75,21 @@ pub fn banner() -> TextView {
 pub fn rules() -> TextView {
     TextView::new(
 "
-A random password is generated based on your settings:
+A random code is generated based on your settings:
 
 1. \"Digit number\" sets the amount of different
     characters to feature.
-2. \"Password length\" sets the length of the generated
-    password.
+2. \"Code length\" sets the length of the generated
+    code.
 
 You try to guess it by filling in the input box.
 The game gives you feedback:
 
-1. An exclamation mark means that one character in your
-   guess is right.
-2. A question mark means that one character is featured
-   in the password but on another position.
-3. A dot means that a character isn't featured at all."
+1. An exclamation mark means that one character in
+   your guess is right.
+2. A question mark means that one character is
+   featured in the code but on another position.
+3. A dot means that a character isn't featured at
+   all."
     ).style(Color::Dark(BaseColor::Blue))
 }
