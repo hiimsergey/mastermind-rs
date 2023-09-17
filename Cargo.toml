@@ -4,7 +4,11 @@ version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-cursive = "0.20.0"
 cursive-aligned-view = "0.6.0"
 rand = "0.8.5"
 webbrowser = "0.8.11"
+
+[dependencies.cursive]
+version = "0.20.0"
+default-features = false
+features = ["pancurses-backend"]
