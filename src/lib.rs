@@ -70,7 +70,7 @@ Utilizes the \"cursive\" crate for building TUIs.
                 .child(util::source_button("https://crates.io/crates/cursive"))
                 .child(
                     TextView::new("
-v. 0.2.5 - GPLv3 License "
+v. 0.2.6 - GPLv3 License "
                     ).style(Color::Dark(BaseColor::Blue))
                 )
         ).button("Ok", |s| { s.pop_layer(); })

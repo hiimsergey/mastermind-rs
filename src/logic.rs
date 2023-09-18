@@ -105,8 +105,8 @@ fn print_feedback(s: &mut Cursive, guess: &str, feedback: String) {
                 ).style(Color::Dark(BaseColor::Blue))
             ).title("You won!")
             .button("Ok", |s| { s.pop_layer(); })
+            .button("Play again", |s| { s.pop_layer(); s.pop_layer(); crate::game(s); } )
             .button("Menu", |s| { s.pop_layer(); s.pop_layer(); })
-            .button("Quit", |s| s.quit() )
         );
     }
 }
