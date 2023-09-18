@@ -20,6 +20,7 @@ use cursive::{
 };
 use cursive_aligned_view::Alignable;
 
+// Spawn menu/main window
 pub fn menu(s: &mut Cursive) {
     s.add_global_callback(Key::Esc, |s| quit_window(s));
     s.add_global_callback('q', |s| { s.pop_layer(); });
@@ -46,6 +47,7 @@ pub fn menu(s: &mut Cursive) {
     );
 }
 
+// Spawn about page
 fn about(s: &mut Cursive) {
     s.add_layer(
         Dialog::around(
@@ -79,6 +81,7 @@ v. 0.2.6 - GPLv3 License "
     );
 }
 
+// Start game and spawn game window
 fn game(s: &mut Cursive) {
     let digit_num: u8 = s.call_on_name("digit_num", |v: &mut TextView| {
         let binding = v.get_content();
@@ -130,6 +133,7 @@ Code length:     {pass_len}"
     );
 }
 
+// Spawn confirmation window when pressing Esc
 fn quit_window(s: &mut Cursive) {
     s.add_layer(
         OnEventView::new(
@@ -145,6 +149,7 @@ fn quit_window(s: &mut Cursive) {
     );
 }
 
+// Spawn rules page
 fn rules(s: &mut Cursive) {
     s.add_layer(
         Dialog::around(

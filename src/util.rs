@@ -1,3 +1,5 @@
+// util.rs - some helper functions for the other files
+
 use cursive::{
     theme::{ BaseColor, Color },
     view::Nameable,

@@ -12,6 +12,7 @@ use cursive::{
 };
 use rand::Rng;
 
+// Check whether given guess meets rules
 pub fn check_guess(s: &mut Cursive, guess: &str, digit_num: u8, code: &Vec<u8>) {
     if let Err(err) = get_guess_status(guess, digit_num, code) {
         s.add_layer(
@@ -30,6 +31,7 @@ pub fn check_guess(s: &mut Cursive, guess: &str, digit_num: u8, code: &Vec<u8>) 
     } else { compare_guess(s, guess, code); }
 }
 
+// Generate code based on settings given at lib::menu()
 pub fn gen_code(digit_num: u8, pass_len: u8) -> Vec<u8> {
     let mut rng = rand::thread_rng();
     let mut pass = Vec::<u8>::new();
@@ -39,6 +41,7 @@ pub fn gen_code(digit_num: u8, pass_len: u8) -> Vec<u8> {
     pass
 }
 
+// Compare given guess and generated code -> initialise feedback variable (??!?..)
 fn compare_guess(s: &mut Cursive, guess: &str, code: &Vec<u8>) {
     let mut feedback = String::new();
     let mut guess_vec: Vec<u8> = guess
@@ -67,6 +70,7 @@ fn compare_guess(s: &mut Cursive, guess: &str, code: &Vec<u8>) {
     print_feedback(s, guess, feedback);
 }
 
+// Return whether the given guess meets rules or not
 fn get_guess_status(guess: &str, digit_num: u8, code: &Vec<u8>) -> Result<(), FormatError> {
     if guess.len() < code.len() {
         return Err(FormatError::Short);
@@ -82,6 +86,7 @@ fn get_guess_status(guess: &str, digit_num: u8, code: &Vec<u8>) -> Result<(), Fo
     Ok(())
 }
 
+// Print feedback into lib::game() window
 fn print_feedback(s: &mut Cursive, guess: &str, feedback: String) {
     s.call_on_name("list", |v: &mut ScrollView<ListView>| {
         let len = format!("{}.", v.get_inner().len() + 1);
