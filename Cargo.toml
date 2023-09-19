@@ -5,6 +5,7 @@ authors = ["Sergey Lavrent"]
 edition = "2021"
 description = "A TUI-base game based on Mastermind/Bulls & Cows"
 repository = "https://github.com/hiimsergey/mastermind-rs"
+license = "GPLv3"
 license-file = "LICENSE"
 keywords = ["tui", "game", "boardgame", "board-game"]
 categories = ["command-line-utilities", "games"]
