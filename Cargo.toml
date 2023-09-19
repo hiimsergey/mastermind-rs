@@ -1,6 +1,6 @@
 [package]
 name = "mastermind-rs"
-version = "0.2.5"
+version = "0.2.7"
 authors = ["Sergey Lavrent"]
 edition = "2021"
 description = "A TUI game based on Mastermind/Bulls & Cows"
