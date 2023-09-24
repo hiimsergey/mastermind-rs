@@ -17,4 +17,4 @@ webbrowser = "0.8.11"
 [dependencies.cursive]
 version = "0.20.0"
 default-features = false
-features = ["pancurses-backend"]
+features = ["crossterm-backend"]
