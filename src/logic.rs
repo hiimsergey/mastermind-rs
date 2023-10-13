@@ -101,7 +101,6 @@ fn print_feedback(s: &mut Cursive, guess: &str, feedback: String) {
                 len_fmt = guess.len() + 4
             )),
         );
-        v.scroll_to_bottom();
     });
 
     if feedback.chars().all(|c| c == '!') {

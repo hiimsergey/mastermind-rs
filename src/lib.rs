@@ -3,7 +3,7 @@ mod util;
 use cursive::{
     event::Key,
     theme::{BaseColor, Color},
-    view::{Nameable, Resizable},
+    view::{Nameable, Resizable, ScrollStrategy},
     views::{
         Button, Dialog, DummyView, EditView, LinearLayout, ListView, OnEventView, Panel,
         ScrollView, TextView,
@@ -68,7 +68,7 @@ Utilizes the \"cursive\" crate for building TUIs.
                 .child(
                     TextView::new(
                         "
-v. 0.2.7 - GPLv3 License ",
+v. 0.2.9 - GPLv3 License ",
                     )
                     .style(Color::Dark(BaseColor::Blue)),
                 ),
@@ -115,7 +115,7 @@ Code length:     {pass_len}"
                 .fixed_width(pass_len as usize + 1),
         );
 
-    let list = Panel::new(ScrollView::new(ListView::new()).with_name("list"))
+    let list = Panel::new(ScrollView::new(ListView::new()).scroll_strategy(ScrollStrategy::StickToBottom).with_name("list"))
         .fixed_height(12)
         .fixed_width(2 * (pass_len as usize) + 14);
     let game_sidebar = LinearLayout::vertical()
