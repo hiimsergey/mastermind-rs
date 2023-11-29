@@ -68,7 +68,7 @@ Utilizes the \"cursive\" crate for building TUIs.
                 .child(
                     TextView::new(
                         "
-v. 0.2.9 - GPLv3 License ",
+v. 0.2.10 - GPLv3 License ",
                     )
                     .style(Color::Dark(BaseColor::Blue)),
                 ),

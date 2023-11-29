@@ -106,7 +106,7 @@ fn print_feedback(s: &mut Cursive, guess: &str, feedback: String) {
     if feedback.chars().all(|c| c == '!') {
         s.call_on_name("input", |v: &mut EditView| v.disable());
         s.add_layer(
-            Dialog::around(TextView::new("Congratulations!").style(Color::Dark(BaseColor::Blue)))
+            Dialog::around(TextView::new(format!("{guess} was the correct code.")).style(Color::Dark(BaseColor::Blue)))
                 .title("You won!")
                 .button("Ok", |s| {
                     s.pop_layer();
