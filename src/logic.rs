@@ -17,7 +17,7 @@ pub fn get_code(code_length: u8, digit_number: u8) -> String {
 /// Depending on the validity of the guess, warns about the error or pushes the
 /// guess to the list.
 pub fn submit_guess(s: &mut Cursive, guess: &str, code: &str, digit_number: u8) {
-    if let Err(err) = get_code_validitiy(guess, code, digit_number) {
+    if let Err(err) = get_code_validity(guess, code, digit_number) {
         windows::guess_error(s, err);
         // Empties the input bar
         s.call_on_name("input", |v: &mut EditView| { v.set_content(""); });
@@ -44,7 +44,7 @@ pub fn submit_guess(s: &mut Cursive, guess: &str, code: &str, digit_number: u8) 
 
 /// Checks whether the guess is valid in terms of length and characters.
 /// Returns `Ok(())` if valid and the respective `CodeError` member otherwise.
-fn get_code_validitiy(guess: &str, code: &str, digit_number: u8) -> Result<(), CodeError> {
+fn get_code_validity(guess: &str, code: &str, digit_number: u8) -> Result<(), CodeError> {
     if guess.len() < code.len() { return Err(CodeError::Short); }
     if guess.parse::<u32>().is_err() { return Err(CodeError::NaN); }
     
