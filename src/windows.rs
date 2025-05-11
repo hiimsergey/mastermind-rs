@@ -151,16 +151,7 @@ fn game(s: &mut Cursive) {
 /// Spawns a window with the game rules
 fn rules(s: &mut Cursive) {
     s.add_layer(
-        Dialog::around(
-            LinearLayout::vertical()
-                // The text is separated in five parts because each has a
-                // different color :[
-                .child(util::text_rules_1())
-                .child(util::text_rules_2())
-                .child(util::text_rules_3())
-                .child(util::text_rules_4())
-                .child(util::text_rules_5())
-        )
+        Dialog::around(util::text_rules())
             .title("Rules")
             .button("Ok", |s| { s.pop_layer(); })
     );

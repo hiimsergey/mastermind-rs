@@ -36,57 +36,35 @@ Utilizes the \"cursive\" crate for building TUIs.
 
   <https://crates.io/crates/cursive>
 
-v1.0.0  GPL-3.0 Licence"
+v1.0.1  GPL-3.0 Licence"
     ).style(Color::Dark(BaseColor::Blue))
 }
 
-pub fn text_rules_1() -> TextView {
+pub fn text_rules() -> TextView {
     TextView::new(
 "
 Use the arrow keys or the mouse to navigate.
 Press q to close windows and Esc to quit the game.
 
-"
-    )
-}
+A random code is generated based on your settings:
 
-pub fn text_rules_2() -> TextView {
-    TextView::new(
-"A random code is generated based on your settings:
-
-"
-    ).style(Color::Dark(BaseColor::Blue))
-}
-
-pub fn text_rules_3() -> TextView {
-    TextView::new(
-"1. \"Digit number\" sets the amount of different
+1. \"Digit number\" sets the amount of different
     characters to feature.
 2. \"Code length\" sets the length of the generated
     code.
 
-"
-    ).style(Color::Dark(BaseColor::Magenta))
-}
 
-pub fn text_rules_4() -> TextView {
-    TextView::new(
-"You try to guess it by filling in the input box.
+
+You try to guess it by filling in the input box.
 The game gives you feedback:
 
-"
-    ).style(Color::Dark(BaseColor::Blue))
-}
-
-pub fn text_rules_5() -> TextView {
-    TextView::new(
-"1. An exclamation mark means that one character in
+1. An exclamation mark means that one character in
     your guess is right.
 2. A question mark means that one character is
     featured in the code but on another position.
 3. A dot means that a character isn't featured at
     all."
-    ).style(Color::Dark(BaseColor::Magenta))
+    )
 }
 
 pub fn text_settings_ingame(digit_number: u8, code_length: u8) -> TextView {
